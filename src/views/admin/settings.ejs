@@ -1,0 +1,134 @@
+<h1 class="h3 mb-4 text-gray-800">
+  <i class="bi bi-gear text-primary"></i> Configurações do Sistema
+</h1>
+
+<div class="row">
+  <!-- Configuração de Auto Coordenador -->
+  <div class="col-lg-6">
+    <div class="card shadow mb-4">
+      <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">
+          <i class="bi bi-person-badge"></i> Regra de Auto-Coordenador
+        </h6>
+      </div>
+      <div class="card-body">
+        <div class="mb-3">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div class="fw-semibold mb-1">Auto Coordenador para Enfermeiros</div>
+              <div class="text-muted small">
+                Quando habilitado, usuários com cargo contendo "Enfermeiro" serão automaticamente cadastrados com perfil COORDINATOR.
+              </div>
+            </div>
+            <div class="ms-3">
+              <% if (autoCoordinator) { %>
+                <span class="badge bg-success fs-6">
+                  <i class="bi bi-check-circle-fill"></i> ATIVO
+                </span>
+              <% } else { %>
+                <span class="badge bg-warning text-dark fs-6">
+                  <i class="bi bi-x-circle-fill"></i> INATIVO
+                </span>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert alert-info mb-0">
+          <i class="bi bi-info-circle-fill"></i>
+          <strong>Variável de Ambiente:</strong>
+          <code class="ms-2">AUTO_COORDINATOR_FOR_ENFERMEIRO = <%= autoCoordinator ? 'true' : 'false' %></code>
+          <div class="mt-2 small">
+            Para alterar esta configuração, edite o arquivo <code>.env</code> e reinicie o servidor.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Informações do Sistema -->
+  <div class="col-lg-6">
+    <div class="card shadow mb-4">
+      <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">
+          <i class="bi bi-info-circle"></i> Informações do Sistema
+        </h6>
+      </div>
+      <div class="card-body">
+        <div class="mb-3">
+          <div class="small text-muted mb-1">Versão</div>
+          <div class="fw-semibold">Helpdesk TI v2.0.0</div>
+        </div>
+
+        <div class="mb-3">
+          <div class="small text-muted mb-1">Banco de Dados</div>
+          <div class="fw-semibold">
+            <i class="bi bi-database"></i> MySQL
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <div class="small text-muted mb-1">Recursos Ativos</div>
+          <div>
+            <span class="badge bg-success me-1">
+              <i class="bi bi-check"></i> Gestão de Insumos
+            </span>
+            <span class="badge bg-success me-1">
+              <i class="bi bi-check"></i> SLA Configurável
+            </span>
+            <span class="badge bg-success me-1">
+              <i class="bi bi-check"></i> Auditoria
+            </span>
+            <span class="badge bg-success me-1">
+              <i class="bi bi-check"></i> Aprovação de Equipamentos
+            </span>
+          </div>
+        </div>
+
+        <div class="mb-0">
+          <div class="small text-muted mb-1">Ambiente</div>
+          <div class="fw-semibold">
+            <i class="bi bi-server"></i> Produção
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Ações Rápidas -->
+<div class="row">
+  <div class="col-12">
+    <div class="card shadow">
+      <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">
+          <i class="bi bi-lightning"></i> Ações Rápidas
+        </h6>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <a href="/admin/users" class="btn btn-outline-primary w-100">
+              <i class="bi bi-people"></i> Gerenciar Usuários
+            </a>
+          </div>
+          <div class="col-md-3">
+            <a href="/admin/categories" class="btn btn-outline-primary w-100">
+              <i class="bi bi-tags"></i> Gerenciar Categorias
+            </a>
+          </div>
+          <div class="col-md-3">
+            <a href="/admin/insumos" class="btn btn-outline-primary w-100">
+              <i class="bi bi-box-seam"></i> Gerenciar Estoque
+            </a>
+          </div>
+          <div class="col-md-3">
+            <a href="/admin/audit" class="btn btn-outline-primary w-100">
+              <i class="bi bi-journal-text"></i> Ver Auditoria
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

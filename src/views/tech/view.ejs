@@ -1,0 +1,146 @@
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+  <div>
+    <h1 class="h4 mb-1">Atender chamado #<%= ticket.id %>
+    </h1>
+    <div class="text-secondary small">
+      USF: <%= ticket.usf?.nome %> • Sala: <%= ticket.room %> • Categoria: <%= ticket.category?.nome %>
+    </div>
+  </div>
+
+  <div class="d-flex gap-2 flex-wrap">
+    <span class="badge <%= statusBadgeClass(ticket.status) %>">
+      <%= translateStatus(ticket.status) %>
+    </span>
+    <span class="badge <%= priorityBadgeClass(ticket.priority) %>">
+      <%= translatePriority(ticket.priority) %>
+    </span>
+    <a class="btn btn-outline-secondary btn-sm" href="/tickets/<%= ticket.id %>">Ver detalhe</a>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-12 col-lg-6">
+    <div class="card">
+      <div class="card-header fw-semibold">Atribuição</div>
+      <div class="card-body">
+        <form method="post" action="/tech/tickets/<%= ticket.id %>/assign">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <div class="mb-3">
+            <label class="form-label">Responsável</label>
+            <select class="form-select" name="assigneeId">
+              <option value="">Não atribuído</option>
+              <% techs.forEach(t=> { %>
+                <option value="<%= t.id %>" <%=ticket.assigneeId===t.id ? 'selected' : '' %>><%= t.nome %>
+                </option>
+                <% }) %>
+            </select>
+          </div>
+          <button class="btn btn-primary" type="submit">Salvar</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card mt-3">
+      <div class="card-header fw-semibold">Atualizar ticket</div>
+      <div class="card-body">
+        <form method="post" action="/tech/tickets/<%= ticket.id %>/update">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <label class="form-label">Status</label>
+              <select class="form-select" name="status">
+                <% ['OPEN','IN_PROGRESS','WAITING','RESOLVED','CLOSED'].forEach(s=> { %>
+                  <option value="<%= s %>" <%=ticket.status===s ? 'selected' : '' %>><%= translateStatus(s) %>
+                  </option>
+                  <% }) %>
+              </select>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label">Prioridade</label>
+              <select class="form-select" name="priority">
+                <% ['LOW','MEDIUM','HIGH','URGENT'].forEach(p=> { %>
+                  <option value="<%= p %>" <%=ticket.priority===p ? 'selected' : '' %>><%= translatePriority(p) %>
+                  </option>
+                  <% }) %>
+              </select>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Resolução (obrigatório ao RESOLVED/CLOSED)</label>
+              <select class="form-select" name="resolution">
+                <option value="">(não definido)</option>
+                <% [ 'RESOLVIDO_SEM_TROCA_PECA' , 'RESOLVIDO_COM_TROCA_PECA' , 'AGUARDANDO_PECA_SEM_ESTOQUE'
+                  , 'SEM_REPARO_EQUIPAMENTO_CONDENADO' , 'ENCAMINHADO_TERCEIROS' ].forEach(r=> { %>
+                  <option value="<%= r %>" <%=ticket.resolution===r ? 'selected' : '' %>><%= r %>
+                  </option>
+                  <% }) %>
+              </select>
+              <div class="form-text">Se escolher "AGUARDANDO_PECA_SEM_ESTOQUE", não encerre o ticket.</div>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Peça(s) utilizada(s) (quando troca)</label>
+              <input class="form-control" name="trocaPecas" value="<%= ticket.trocaPecas || '' %>">
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label">Data da troca (quando troca)</label>
+              <input class="form-control" type="date" name="trocaData"
+                value="<%= ticket.trocaData ? new Date(ticket.trocaData).toISOString().slice(0,10) : '' %>">
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label">Patrimônio (opcional)</label>
+              <input class="form-control" name="equipamentoPatrimonio"
+                value="<%= ticket.equipamentoPatrimonio || '' %>">
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Justificativa (quando "SEM_REPARO")</label>
+              <textarea class="form-control" name="resolutionJustificativa"
+                rows="3"><%= ticket.resolutionJustificativa || '' %></textarea>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Ação recomendada (quando "SEM_REPARO")</label>
+              <textarea class="form-control" name="resolutionAcaoRecomendada"
+                rows="3"><%= ticket.resolutionAcaoRecomendada || '' %></textarea>
+            </div>
+          </div>
+
+          <hr class="my-3">
+          <button class="btn btn-primary" type="submit">Aplicar alterações</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-6">
+    <div class="card">
+      <div class="card-header fw-semibold">SLA</div>
+      <div class="card-body">
+        <div class="text-secondary small">
+          1ª resposta até: <%= fmtDateBR(ticket.responseDueAt) %>
+            <% if (ticket.responseBreachedAt) { %> • <span class="text-danger">Estourado</span>
+              <% } %>
+        </div>
+        <div class="text-secondary small">
+          Resolução até: <%= fmtDateBR(ticket.resolutionDueAt) %>
+            <% if (ticket.resolutionBreachedAt) { %> • <span class="text-danger">Estourado</span>
+              <% } %>
+                <% if (ticket.slaPausedAt) { %> • <span class="text-warning">Pausado</span>
+                  <% } %>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt-3">
+      <div class="card-header fw-semibold">Comentários (use a tela do ticket)</div>
+      <div class="card-body">
+        <a class="btn btn-outline-primary w-100" href="/tickets/<%= ticket.id %>">Abrir conversa</a>
+      </div>
+    </div>
+  </div>
+</div>

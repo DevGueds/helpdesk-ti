@@ -1,0 +1,48 @@
+<h1 class="h3 mb-4 text-danger">⚠️ SLA - Chamados Estourados</h1>
+
+<div class="card shadow mb-4 border-left-danger">
+  <div class="card-header py-3 bg-danger text-white">
+    <h6 class="m-0 font-weight-bold">Chamados Fora do Prazo</h6>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-bordered" width="100%" cellspacing="0">
+        <thead>
+          <tr>
+            <th>#ID</th>
+            <th>Abertura</th>
+            <th>Status</th>
+            <th>USF</th>
+            <th>Categoria</th>
+            <th>Técnico</th>
+            <th>Erro SLA</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (tickets.length === 0) { %>
+            <tr><td colspan="7" class="text-center text-success fw-bold">Parabéns! Nenhum chamado estourado.</td></tr>
+          <% } else { %>
+            <% tickets.forEach(t => { %>
+              <tr>
+                <td><a href="/tickets/<%= t.id %>">#<%= t.id %></a></td>
+                <td><%= new Date(t.createdAt).toLocaleDateString() %></td>
+                <td><span class="badge bg-danger"><%= t.status %></span></td>
+                <td><%= t.usf ? t.usf.nome : '-' %></td>
+                <td><%= t.category ? t.category.nome : '-' %></td>
+                <td><%= t.assignee ? t.assignee.nome : 'Sem técnico' %></td>
+                <td class="text-danger fw-bold">
+                  <% if (t.responseBreachedAt) { %>
+                    RESPOSTA (<%= new Date(t.responseBreachedAt).toLocaleString() %>)
+                  <% } %>
+                  <% if (t.resolutionBreachedAt) { %>
+                     RESOLUÇÃO (<%= new Date(t.resolutionBreachedAt).toLocaleString() %>)
+                  <% } %>
+                </td>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

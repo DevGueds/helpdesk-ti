@@ -1,0 +1,119 @@
+<h1 class="h3 mb-4 text-gray-800">Gestão de Estoque (Insumos)</h1>
+
+<div class="row">
+  <!-- Formulário de Novo Item -->
+  <div class="col-lg-4">
+    <div class="card shadow mb-4">
+      <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Novo Item</h6>
+      </div>
+      <div class="card-body">
+        <form method="post" action="/admin/insumos">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <div class="mb-3">
+                <label class="form-label">Nome do Item</label>
+                <input type="text" name="nome" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Tipo</label>
+                <select name="tipo" class="form-select">
+                    <option value="TONER">Toner</option>
+                    <option value="CABO">Cabo</option>
+                    <option value="PECAS">Peças/Periféricos</option>
+                </select>
+            </div>
+            <div class="row">
+                <div class="col-6 mb-3">
+                    <label class="form-label">Qtd Inicial</label>
+                    <input type="number" name="quantidadeAtual" class="form-control" value="0" min="0">
+                </div>
+                <div class="col-6 mb-3">
+                    <label class="form-label">Mínimo</label>
+                    <input type="number" name="quantidadeMinima" class="form-control" value="5" min="0">
+                </div>
+            </div>
+            <button class="btn btn-primary w-100" type="submit">Cadastrar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de Estoque -->
+  <div class="col-lg-8">
+    <div class="card shadow mb-4">
+      <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Inventário Atual</h6>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Tipo</th>
+                <th>Qtd. Atual</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (insumos.length === 0) { %>
+                <tr><td colspan="5" class="text-center">Estoque vazio.</td></tr>
+              <% } else { %>
+                <% insumos.forEach(item => { %>
+                  <tr>
+                    <td><%= item.nome %></td>
+                    <td><span class="badge text-bg-light border"><%= item.tipo %></span></td>
+                    <td class="fw-bold"><%= item.quantidadeAtual %></td>
+                    <td>
+                        <% if (item.quantidadeAtual < item.quantidadeMinima) { %>
+                            <span class="badge bg-danger">BAIXO</span>
+                        <% } else { %>
+                            <span class="badge bg-success">OK</span>
+                        <% } %>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalUpdate<%= item.id %>">
+                            <i class="bi bi-pencil-square"></i> Ajustar
+                        </button>
+
+                        <!-- Modal de Ajuste -->
+                        <div class="modal fade" id="modalUpdate<%= item.id %>" tabindex="-1">
+                            <div class="modal-dialog">
+                                <form method="post" action="/admin/insumos/<%= item.id %>/update" class="modal-content">
+                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Ajustar Estoque: <%= item.nome %></h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label class="form-label">Ação</label>
+                                            <select name="action" class="form-select">
+                                                <option value="add">Adicionar (+)</option>
+                                                <option value="set">Definir exato (=)</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Quantidade</label>
+                                            <input type="number" name="quantidade" class="form-control" required min="0">
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                                        <button type="submit" class="btn btn-primary">Salvar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

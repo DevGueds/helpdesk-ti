@@ -1,0 +1,31 @@
+{
+  "name": "helpdesk-ti",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node src/server.js",
+    "prisma:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "node prisma/seed.js"
+  },
+  "dependencies": {
+    "@dr.pogodin/csurf": "^1.16.8",
+    "@prisma/client": "6.2.0",
+    "bcrypt": "^5.1.1",
+    "bootstrap": "^5.3.8",
+    "chart.js": "^4.5.1",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "express-ejs-layouts": "^2.5.1",
+    "express-session": "^1.17.3",
+    "helmet": "^7.1.0",
+    "multer": "^2.0.2"
+  },
+  "devDependencies": {
+    "prisma": "6.2.0"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  }
+}

@@ -1,0 +1,164 @@
+<h1 class="h3 mb-4 text-gray-800">
+  <i class="bi bi-tags text-primary"></i> Gerenciar Categorias
+</h1>
+
+<!-- Formulário de Nova Categoria -->
+<div class="card shadow mb-4">
+  <div class="card-header py-3 bg-gradient-primary">
+    <h6 class="m-0 font-weight-bold text-white">
+      <i class="bi bi-plus-circle"></i> Nova Categoria
+    </h6>
+  </div>
+  <div class="card-body">
+    <form method="post" action="/admin/categories">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="catName" class="form-label fw-semibold">Nome da Categoria</label>
+          <input type="text" class="form-control" id="catName" name="nome" required placeholder="Ex: Impressora, Rede, etc.">
+        </div>
+        
+        <div class="col-md-3 mb-3">
+          <label class="form-label fw-semibold">Prioridade Padrão</label>
+          <select name="defaultPriority" class="form-select">
+            <option value="LOW">🟢 Baixa</option>
+            <option value="MEDIUM" selected>🟡 Média</option>
+            <option value="HIGH">🟠 Alta</option>
+            <option value="URGENT">🔴 Urgente</option>
+          </select>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+          <label class="form-label fw-semibold">
+            SLA (Horas)
+            <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" title="Tempo máximo para resolução. Deixe vazio para usar o padrão da prioridade."></i>
+          </label>
+          <input type="number" name="slaHours" class="form-control" placeholder="Opcional" min="1" max="720">
+        </div>
+      </div>
+      
+      <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <button class="btn btn-primary" type="submit">
+          <i class="bi bi-check-circle"></i> Cadastrar Categoria
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Lista de Categorias -->
+<div class="card shadow">
+  <div class="card-header py-3">
+    <h6 class="m-0 font-weight-bold text-primary">
+      <i class="bi bi-list-ul"></i> Categorias Cadastradas
+    </h6>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th class="ps-4">Nome</th>
+            <th>Tipo</th>
+            <th>Prioridade</th>
+            <th>SLA</th>
+            <th>Status</th>
+            <th class="text-end pe-4">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (categories.length === 0) { %>
+            <tr>
+              <td colspan="6" class="text-center py-5 text-muted">
+                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                Nenhuma categoria cadastrada ainda.
+              </td>
+            </tr>
+          <% } else { %>
+            <% categories.forEach(c => { %>
+              <tr>
+                <td class="ps-4">
+                  <div class="d-flex align-items-center">
+                    <i class="bi bi-tag-fill text-primary me-2"></i>
+                    <span class="fw-semibold"><%= c.nome %></span>
+                  </div>
+                </td>
+                <td>
+                  <% if (c.system) { %>
+                    <span class="badge bg-secondary">
+                      <i class="bi bi-lock-fill"></i> Sistema
+                    </span>
+                  <% } else { %>
+                    <span class="badge bg-info">
+                      <i class="bi bi-person-badge"></i> Admin
+                    </span>
+                  <% } %>
+                </td>
+                <td>
+                  <% const priorityColors = {LOW: 'success', MEDIUM: 'warning', HIGH: 'orange', URGENT: 'danger'}; %>
+                  <% const priorityIcons = {LOW: '🟢', MEDIUM: '🟡', HIGH: '🟠', URGENT: '🔴'}; %>
+                  <span class="badge bg-<%= priorityColors[c.defaultPriority] || 'secondary' %>">
+                    <%= priorityIcons[c.defaultPriority] || '' %> <%= c.defaultPriority || 'MEDIUM' %>
+                  </span>
+                </td>
+                <td>
+                  <% if (c.slaHours) { %>
+                    <span class="badge bg-primary">
+                      <i class="bi bi-clock-history"></i> <%= c.slaHours %>h
+                    </span>
+                  <% } else { %>
+                    <span class="text-muted small">Padrão</span>
+                  <% } %>
+                </td>
+                <td>
+                  <% if (c.ativo) { %>
+                    <span class="badge bg-success">
+                      <i class="bi bi-check-circle"></i> Ativo
+                    </span>
+                  <% } else { %>
+                    <span class="badge bg-warning text-dark">
+                      <i class="bi bi-pause-circle"></i> Inativo
+                    </span>
+                  <% } %>
+                </td>
+                <td class="text-end pe-4">
+                  <div class="btn-group" role="group">
+                    <form method="post" action="/admin/categories/<%= c.id %>/toggle" class="d-inline">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <button class="btn btn-sm btn-outline-<%= c.ativo ? 'warning' : 'success' %>" type="submit" 
+                              data-bs-toggle="tooltip" title="<%= c.ativo ? 'Desativar' : 'Ativar' %>">
+                        <i class="bi bi-<%= c.ativo ? 'pause' : 'play' %>-circle"></i>
+                      </button>
+                    </form>
+
+                    <% if (!c.system) { %>
+                      <form method="post" action="/admin/categories/<%= c.id %>/delete" class="d-inline">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <button class="btn btn-sm btn-outline-danger" type="submit" 
+                                onclick="return confirm('Tem certeza que deseja excluir esta categoria?')"
+                                data-bs-toggle="tooltip" title="Excluir">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </form>
+                    <% } %>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Inicializar tooltips do Bootstrap
+  document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+  });
+</script>

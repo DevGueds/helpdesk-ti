@@ -1,0 +1,229 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  REQUESTER
+  COORDINATOR
+  TECH
+  ADMIN
+}
+
+enum RoomName {
+  RECEPCAO
+  ENFERMAGEM
+  MEDICO
+  REUNIAO
+  VACINA
+  TRIAGEM
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING
+  RESOLVED
+  CLOSED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum MessageVisibility {
+  PUBLIC
+  INTERNAL
+}
+
+enum TicketResolution {
+  RESOLVIDO_SEM_TROCA_PECA
+  RESOLVIDO_COM_TROCA_PECA
+  AGUARDANDO_PECA_SEM_ESTOQUE
+  SEM_REPARO_EQUIPAMENTO_CONDENADO
+  ENCAMINHADO_TERCEIROS
+  CADASTRO_CONCLUIDO
+  MODULO_SEGURANCA_CONFIGURADO
+  SENHA_REDEFINIDA
+  PATCH_CORD_REFEITO
+  REDE_CONFIGURADA_LOCAL
+}
+
+model Usf {
+  id    Int    @id @default(autoincrement())
+  nome  String @unique
+
+  // Documentação de rede
+  ipOnt            String?
+  modeloSwitch     String?
+  provedorInternet String?
+
+  users   User[]
+  tickets Ticket[]
+
+  @@map("USF")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  nome         String
+  login        String   @unique
+  telefone     String?
+  cargo        String
+  ativo        Boolean  @default(true)
+  role         Role     @default(REQUESTER)
+
+  usfId        Int
+  usf          Usf      @relation(fields: [usfId], references: [id])
+
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  openedTickets   Ticket[] @relation("TicketRequester")
+  assignedTickets Ticket[] @relation("TicketAssignee")
+
+  messages TicketMessage[]
+  uploads  TicketAttachment[]
+  audits   AuditLog[]
+}
+
+model Category {
+  id     Int     @id @default(autoincrement())
+  nome   String  @unique
+  ativo  Boolean @default(true)
+  system Boolean @default(false)
+  defaultPriority Priority @default(MEDIUM)
+  slaHours        Int?     // SLA em horas (opcional, override da prioridade)
+
+  tickets Ticket[]
+}
+
+model Ticket {
+  id          Int          @id @default(autoincrement())
+  usfId       Int
+  usf         Usf          @relation(fields: [usfId], references: [id])
+
+  requesterId Int
+  requester   User         @relation("TicketRequester", fields: [requesterId], references: [id])
+
+  assigneeId  Int?
+  assignee    User?        @relation("TicketAssignee", fields: [assigneeId], references: [id])
+
+  room        RoomName
+  categoryId  Int
+  category    Category     @relation(fields: [categoryId], references: [id])
+
+  title       String
+  description String
+
+  status      TicketStatus @default(OPEN)
+  priority    Priority     @default(MEDIUM)
+
+  // SLA
+  firstResponseAt    DateTime?
+  responseDueAt      DateTime
+  responseBreachedAt DateTime?
+
+  resolvedAt           DateTime?
+  resolutionDueAt      DateTime
+  resolutionBreachedAt DateTime?
+  slaPausedAt          DateTime?
+  slaPausedTotalMin    Int       @default(0)
+
+  // Resolução padronizada
+  resolution                 TicketResolution?
+  resolutionJustificativa    String?
+  resolutionAcaoRecomendada  String?
+  trocaPecas                 String?
+  trocaData                  DateTime?
+  equipamentoPatrimonio      String?
+
+  // Campos PEC/CADSUS
+  cnsUsuario String?
+  cpfUsuario String?
+
+  // Controle de Insumos
+  insumosUtilizados InsumoHistorico[]
+
+  messages     TicketMessage[]
+  attachments  TicketAttachment[]
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model TicketMessage {
+  id          Int      @id @default(autoincrement())
+  ticketId    Int
+  authorId    Int
+  body        String
+  visibility  MessageVisibility @default(PUBLIC)
+  createdAt   DateTime @default(now())
+
+  ticket      Ticket   @relation(fields: [ticketId], references: [id])
+  author      User     @relation(fields: [authorId], references: [id])
+}
+
+model TicketAttachment {
+  id           Int      @id @default(autoincrement())
+  ticketId     Int
+  uploadedById Int
+
+  originalName String
+  storedName   String
+  mimeType     String
+  sizeBytes    Int
+  storagePath  String
+  createdAt    DateTime @default(now())
+
+  ticket       Ticket   @relation(fields: [ticketId], references: [id])
+  uploadedBy   User     @relation(fields: [uploadedById], references: [id])
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  actorId   Int
+  action    String
+  entity    String
+  entityId  Int
+  dataJson  String?
+  createdAt DateTime @default(now())
+
+  actor     User     @relation(fields: [actorId], references: [id])
+}
+
+enum InsumoTipo {
+  TONER
+  CABO
+  PECAS
+}
+
+model Insumo {
+  id               Int      @id @default(autoincrement())
+  nome             String
+  tipo             InsumoTipo
+  quantidadeAtual  Int
+  quantidadeMinima Int
+
+  historico        InsumoHistorico[]
+}
+
+model InsumoHistorico {
+  id         Int      @id @default(autoincrement())
+  
+  ticketId   Int
+  ticket     Ticket   @relation(fields: [ticketId], references: [id])
+  
+  insumoId   Int
+  insumo     Insumo   @relation(fields: [insumoId], references: [id])
+  
+  quantidade Int
+  dataUso    DateTime @default(now())
+}

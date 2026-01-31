@@ -1,0 +1,114 @@
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-8 col-xl-7">
+
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <div>
+        <h1 class="h3 mb-1">Abrir novo chamado</h1>
+        <p class="text-muted mb-0">Preencha os dados abaixo para solicitar suporte.</p>
+      </div>
+      <a class="btn btn-outline-secondary btn-sm" href="/tickets/my">
+        <i class="bi bi-arrow-left me-1"></i> Voltar
+      </a>
+    </div>
+
+    <div class="card shadow-soft border-0">
+      <div class="card-body p-4 p-md-5">
+
+        <form method="post" action="/tickets/new?_csrf=<%= csrfToken %>" enctype="multipart/form-data">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+          <div class="row g-4">
+
+            <!-- Room -->
+            <div class="col-12 col-md-6">
+              <label class="form-label">
+                <i class="bi bi-geo-alt me-1 text-primary"></i> Sala / Local
+              </label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-building"></i></span>
+                <select class="form-select border-start-0 ps-0" name="room" required>
+                  <option value="">Selecione...</option>
+                  <% rooms.forEach(r=> { %>
+                    <option value="<%= r %>">
+                      <%= r %>
+                    </option>
+                    <% }) %>
+                </select>
+              </div>
+            </div>
+
+            <!-- Category -->
+            <div class="col-12 col-md-6">
+              <label class="form-label">
+                <i class="bi bi-tags me-1 text-primary"></i> Categoria
+              </label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-grid"></i></span>
+                <select class="form-select border-start-0 ps-0" name="categoryId" required>
+                  <option value="">Selecione...</option>
+                  <% categories.forEach(c=> { %>
+                    <option value="<%= c.id %>">
+                      <%= c.nome %>
+                        <%= c.system ? '(Padrão)' : '' %>
+                    </option>
+                    <% }) %>
+                </select>
+              </div>
+            </div>
+
+            <!-- Title -->
+            <div class="col-12">
+              <label class="form-label">
+                <i class="bi bi-chat-square-text me-1 text-primary"></i> Título do Problema
+              </label>
+              <input class="form-control form-control-lg" name="title" placeholder="Ex: Internet lenta..." required />
+            </div>
+
+            <!-- Description -->
+            <div class="col-12">
+              <label class="form-label">
+                <i class="bi bi-text-paragraph me-1 text-primary"></i> Descrição Detalhada
+              </label>
+              <textarea class="form-control" name="description" rows="5"
+                placeholder="Descreva o que está acontecendo com o máximo de detalhes possível..." required></textarea>
+            </div>
+
+            <!-- Attachments -->
+            <div class="col-12">
+              <label class="form-label">
+                <i class="bi bi-paperclip me-1 text-primary"></i> Anexos <span
+                  class="text-muted fw-normal small">(Opcional)</span>
+              </label>
+              <div class="p-4 border rounded-3 bg-light text-center border-dashed">
+                <i class="bi bi-cloud-arrow-up display-6 text-muted mb-2"></i>
+                <div class="mb-3 text-muted small">Clique para selecionar arquivos ou arraste aqui</div>
+                <input class="form-control" type="file" name="attachments" multiple />
+                <div class="form-text mt-2">Formatos permitidos: JPG, PNG, PDF (Max 8MB)</div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-5">
+            <a class="btn btn-light text-muted px-4" href="/tickets/my">Cancelar</a>
+            <button class="btn btn-primary px-5 py-2" type="submit">
+              <i class="bi bi-send me-2"></i> Abrir Chamado
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .border-dashed {
+    border-style: dashed !important;
+  }
+
+  .input-group-text {
+    background-color: rgba(255, 255, 255, 0.8) !important;
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+</style>
