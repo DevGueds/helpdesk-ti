@@ -6,7 +6,7 @@
 ![MySQL](https://img.shields.io/badge/MySQL-8.0-00758f?style=for-the-badge&logo=mysql&logoColor=white)
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-5-7952b3?style=for-the-badge&logo=bootstrap&logoColor=white)
 
-> Sistema completo para gerenciamento de chamados de T.I., focado em eficiência operacional, controle de SLA e gestão de ativos.
+> Sistema para gerenciamento de chamados de T.I., focado em eficiência operacional, controle de SLA e gestão de ativos.
 
 ---
 
@@ -16,7 +16,7 @@
 
 ## 🎯 Sobre o Projeto
 
-O **HelpDesk TI** foi desenvolvido para solucionar a desorganização no atendimento de suporte técnico em ambientes corporativos. Ele centraliza solicitações, automatiza o cálculo de SLA e fornece métricas claras para a tomada de decisão.
+O **HelpDesk TI** foi desenvolvido para solucionar a desorganização no atendimento de suporte técnico em secretarias de saúde onde existem departamento de TI. Ele centraliza solicitações, automatiza o cálculo de SLA e fornece métricas claras para a tomada de decisão.
 
 ### ✨ Diferenciais Técnicos
 Este projeto não é apenas um CRUD. Ele foi construído seguindo boas práticas de engenharia de software:
