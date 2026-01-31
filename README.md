@@ -1,39 +1,77 @@
-# HelpDesk TI
+# HelpDesk TI 🚀
 
-Sistema de Gerenciamento de Chamados e Inventário de TI desenvolvido para otimizar o fluxo de trabalho do departamento de tecnologia. O sistema permite a abertura, acompanhamento e resolução de chamados, além de controle de SLA e gerenciamento de inventário.
+![NodeJS](https://img.shields.io/badge/Node.js-18.x-43853d?style=for-the-badge&logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/Express-4.x-000000?style=for-the-badge&logo=express&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-ORM-2d3748?style=for-the-badge&logo=prisma&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-8.0-00758f?style=for-the-badge&logo=mysql&logoColor=white)
+![Bootstrap](https://img.shields.io/badge/Bootstrap-5-7952b3?style=for-the-badge&logo=bootstrap&logoColor=white)
 
-## 🚀 Funcionalidades
+> Sistema completo para gerenciamento de chamados de T.I., focado em eficiência operacional, controle de SLA e gestão de ativos.
 
-- **Gestão de Chamados**: Abertura, editção, acompanhamento e encerramento de tickets.
-- **Perfis de Usuário**:
-  - **Solicitante**: Abre chamados.
-  - **Técnico**: Atende e resolve chamados.
-  - **Coordenador**: Gerencia equipe e visualiza relatórios.
-  - **Admin**: Acesso total ao sistema.
-- **Dashboard**: Visão geral métricas e indicadores.
-- **SLA (Service Level Agreement)**: Controle de prazos de atendimento e resolução prioridades.
-- **Inventário e Insumos**: Controle de estoque de toner, cabos e peças.
-- **Auditoria**: Logs de ações realizadas no sistema.
-- **Anexos e Comentários**: Upload de arquivos e chat dentro do chamado.
+---
 
-## 🛠️ Tecnologias Utilizadas
+## 📸 Preview
 
-- **Backend**: Node.js com Express
-- **Banco de Dados**: MySQL gerenciado pelo Prisma ORM
-- **Frontend**: EJS (Embedded JavaScript) com Bootstrap 5
-- **Autenticação**: Sessão express-session e proteção CSRF
-- **Outros**: Chart.js (Dashboards), Multer (Uploads), Dotenv
+![Dashboard Preview](public/screenshots/dashboard.png)
+*(Coloque um print do seu dashboard aqui)*
 
-## 📋 Pré-requisitos
+## 🎯 Sobre o Projeto
 
-- [Node.js](https://nodejs.org/) (versão 18 ou superior recomendada)
-- [MySQL](https://www.mysql.com/)
+O **HelpDesk TI** foi desenvolvido para solucionar a desorganização no atendimento de suporte técnico em ambientes corporativos. Ele centraliza solicitações, automatiza o cálculo de SLA e fornece métricas claras para a tomada de decisão.
 
-## 🔧 Instalação e Configuração
+### ✨ Diferenciais Técnicos
+Este projeto não é apenas um CRUD. Ele foi construído seguindo boas práticas de engenharia de software:
 
-1.  **Clone o projeto** (se aplicável)
+*   **Arquitetura MVC (Model-View-Controller)**: Separação clara de responsabilidades para facilitar a manutenção.
+*   **Segurança em Primeiro Lugar**:
+    *   **CSRF Protection**: Proteção contra ataques de falsificação de solicitação entre sites.
+    *   **Helmet**: Configuração de headers HTTP seguros.
+    *   **Bcrypt**: Hash seguro de senhas.
+    *   **Sanitization**: Tratamento de inputs para prevenir injeção.
+*   **Performance & Dados**:
+    *   **Prisma ORM**: Modelagem de dados eficiente e typesafe.
+    *   **Database Seeding**: Scripts automatizados para popular o banco de desenvolvimento.
+
+## 🚀 Funcionalidades Principais
+
+*   🎫 **Gestão de Tickets**: Workflow completo (Aberto -> Em Andamento -> Resolvido -> Fechado).
+*   ⏱️ **Controle de SLA**: Monitoramento automático de prazos de atendimento e resolução.
+*   📦 **Controle de Inventário**: Gestão de insumos (toners, peças) integrada aos chamados.
+*   📊 **Dashboard Administrativo**: Visão macro com gráficos (Chart.js) e indicadores em tempo real.
+*   👥 **Controle de Acesso (RBAC)**: Perfis distintos para Admin, Técnico, Coordenador e Solicitante.
+*   📎 **Anexos e Chat**: Comunicação integrada dentro do ticket.
+
+## � Roadmap (Em Desenvolvimento)
+
+O projeto está em constante evolução. As próximas atualizações focarão em:
+
+*   [ ] **Integração Estoque-Chamados**: Baixa automática de insumos no estoque ao registrar substituição de peças no chamado.
+*   [ ] **Relatórios Avançados**: Exportação de dados e indicadores para Excel/CSV.
+*   [ ] **Gestão de Senhas**: Funcionalidade para o Administrador redefinir senhas e fluxo de "Esqueci minha senha" para usuários.
+*   [ ] **SLA Dinâmico**:
+    *   Interface para configuração de prazos (SLA) por Categoria.
+    *   Visualização de tempo estimado de atendimento para o solicitante.
+    *   Refinamento das regras para atender especificidades da Secretaria de Saúde.
+*   [ ] **Dashboard por Unidade**: Visão analítica para as USFs acompanharem suas categorias com maior demanda.
+
+## �🛠️ Tecnologias
+
+*   **Backend**: Node.js, Express
+*   **Database**: MySQL, Prisma ORM
+*   **Frontend**: EJS (Server-side rendering), Bootstrap 5, Vanilla JS
+*   **Ferramentas**: Git, VS Code
+
+## 🏁 Como Rodar o Projeto
+
+### Pré-requisitos
+*   Node.js (v18+)
+*   MySQL rodando (Local ou Docker)
+
+### Passo a Passo
+
+1.  **Clone o repositório**
     ```bash
-    git clone <url-do-repositorio>
+    git clone https://github.com/DevGueds/helpdesk-ti.git
     cd helpdesk-ti
     ```
 
@@ -42,45 +80,30 @@ Sistema de Gerenciamento de Chamados e Inventário de TI desenvolvido para otimi
     npm install
     ```
 
-3.  **Configure o Banco de Dados**
-    - Crie um arquivo `.env` na raiz do projeto copiando o exemplo (se houver) ou configure a variável `DATABASE_URL`:
+3.  **Configure o Ambiente**
+    Crie um arquivo `.env` na raiz:
     ```env
-    DATABASE_URL="mysql://usuario:senha@localhost:3306/nome_do_banco"
-    SESSION_SECRET="sua_chave_secreta"
+    DATABASE_URL="mysql://usuario:senha@localhost:3306/helpdesk"
+    SESSION_SECRET="segredo_super_seguro"
     ```
 
-4.  **Execute as Migrations e Seed**
-    Para criar as tabelas e popular o banco com dados iniciais (admin, categorias, etc):
+4.  **Setup do Banco de Dados**
     ```bash
-    npm run db:migrate
-    npm run db:seed
+    npm run db:migrate  # Cria as tabelas
+    npm run db:seed     # Cria usuário admin (Login: admin / Senha: Admin@123)
     ```
 
-## 🚀 Executando o Projeto
+5.  **Execute**
+    ```bash
+    npm run dev
+    ```
+    Acesse: `http://localhost:3000`
 
-Para iniciar o servidor em ambiente de desenvolvimento:
+## 👤 Autor
 
-```bash
-npm run dev
-```
+**Vinicius Guedes**
+*   [LinkedIn](https://linkedin.com/in/seu-linkedin)
+*   [GitHub](https://github.com/DevGueds)
 
-Ou utilize o arquivo batch se estiver no Windows:
-- Execute `start.bat`
-
-O servidor iniciará geralmente em `http://localhost:3000` (ou a porta definida no seu server.js).
-
-## 📂 Estrutura do Projeto
-
-- `src/`: Código fonte do backend (controllers, middlewares, routes).
-- `views/`: Templates EJS para o frontend.
-- `public/`: Arquivos estáticos (CSS, JS do cliente, imagens).
-- `prisma/`: Schema do banco de dados, migrations e seeds.
-- `uploads/`: Diretório de armazenamento de arquivos anexados.
-
-## 🤝 Contribuição
-
-1.  Faça um Fork do projeto
-2.  Crie uma Branch para sua Feature (`git checkout -b feature/MinhaFeature`)
-3.  Faça o Commit de suas mudanças (`git commit -m 'Adiciona a MinhaFeature'`)
-4.  Faça o Push para a Branch (`git push origin feature/MinhaFeature`)
-5.  Abra um Pull Request
+---
+*Desenvolvido com ❤️ e café.*
