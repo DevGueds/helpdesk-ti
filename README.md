@@ -101,7 +101,7 @@ O projeto está em constante evolução. As próximas atualizações focarão em
 ## 👤 Autor
 
 **Vinicius Guedes**
-*   [LinkedIn](https://linkedin.com/in/seu-linkedin)
+*   [LinkedIn](linkedin.com/in/devguedes)
 *   [GitHub](https://github.com/DevGueds)
 
 ---
