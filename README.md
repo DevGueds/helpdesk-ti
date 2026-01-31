@@ -13,7 +13,6 @@
 ## 📸 Preview
 
 ![Dashboard Preview](public/screenshots/dashboard.png)
-*(Coloque um print do seu dashboard aqui)*
 
 ## 🎯 Sobre o Projeto
 
