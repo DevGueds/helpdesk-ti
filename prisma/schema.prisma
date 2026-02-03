@@ -3,8 +3,160 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model Usf {
+  id               Int      @id @default(autoincrement())
+  nome             String   @unique
+  ipOnt            String?
+  modeloSwitch     String?
+  provedorInternet String?
+  tickets          Ticket[]
+  users            User[]
+
+  @@map("USF")
+}
+
+model User {
+  id              Int                @id @default(autoincrement())
+  nome            String
+  login           String             @unique
+  telefone        String?
+  cargo           String
+  ativo           Boolean            @default(true)
+  role            Role               @default(REQUESTER)
+  usfId           Int
+  passwordHash    String
+  createdAt       DateTime           @default(now())
+  audits          AuditLog[]
+  assignedTickets Ticket[]           @relation("TicketAssignee")
+  openedTickets   Ticket[]           @relation("TicketRequester")
+  uploads         TicketAttachment[]
+  messages        TicketMessage[]
+  usf             Usf                @relation(fields: [usfId], references: [id])
+
+  @@index([usfId], map: "User_usfId_fkey")
+}
+
+model Category {
+  id              Int      @id @default(autoincrement())
+  nome            String   @unique
+  ativo           Boolean  @default(true)
+  system          Boolean  @default(false)
+  defaultPriority Priority @default(MEDIUM)
+  slaHours        Int?
+  tickets         Ticket[]
+}
+
+model Ticket {
+  id                        Int                @id @default(autoincrement())
+  usfId                     Int
+  requesterId               Int
+  assigneeId                Int?
+  room                      RoomName
+  categoryId                Int
+  title                     String
+  description               String
+  status                    TicketStatus       @default(OPEN)
+  priority                  Priority           @default(MEDIUM)
+  firstResponseAt           DateTime?
+  responseDueAt             DateTime
+  responseBreachedAt        DateTime?
+  resolvedAt                DateTime?
+  resolutionDueAt           DateTime
+  resolutionBreachedAt      DateTime?
+  slaPausedAt               DateTime?
+  slaPausedTotalMin         Int                @default(0)
+  resolution                TicketResolution?
+  resolutionJustificativa   String?
+  resolutionAcaoRecomendada String?
+  trocaPecas                String?
+  trocaData                 DateTime?
+  equipamentoPatrimonio     String?
+  cnsUsuario                String?
+  cpfUsuario                String?
+  createdAt                 DateTime           @default(now())
+  updatedAt                 DateTime           @updatedAt
+  insumosUtilizados         InsumoHistorico[]
+  assignee                  User?              @relation("TicketAssignee", fields: [assigneeId], references: [id])
+  category                  Category           @relation(fields: [categoryId], references: [id])
+  requester                 User               @relation("TicketRequester", fields: [requesterId], references: [id])
+  usf                       Usf                @relation(fields: [usfId], references: [id])
+  attachments               TicketAttachment[]
+  messages                  TicketMessage[]
+
+  @@index([assigneeId], map: "Ticket_assigneeId_fkey")
+  @@index([categoryId], map: "Ticket_categoryId_fkey")
+  @@index([requesterId], map: "Ticket_requesterId_fkey")
+  @@index([usfId], map: "Ticket_usfId_fkey")
+}
+
+model TicketMessage {
+  id         Int               @id @default(autoincrement())
+  ticketId   Int
+  authorId   Int
+  body       String
+  visibility MessageVisibility @default(PUBLIC)
+  createdAt  DateTime          @default(now())
+  author     User              @relation(fields: [authorId], references: [id])
+  ticket     Ticket            @relation(fields: [ticketId], references: [id])
+
+  @@index([authorId], map: "TicketMessage_authorId_fkey")
+  @@index([ticketId], map: "TicketMessage_ticketId_fkey")
+}
+
+model TicketAttachment {
+  id           Int      @id @default(autoincrement())
+  ticketId     Int
+  uploadedById Int
+  originalName String
+  storedName   String
+  mimeType     String
+  sizeBytes    Int
+  storagePath  String
+  createdAt    DateTime @default(now())
+  ticket       Ticket   @relation(fields: [ticketId], references: [id])
+  uploadedBy   User     @relation(fields: [uploadedById], references: [id])
+
+  @@index([ticketId], map: "TicketAttachment_ticketId_fkey")
+  @@index([uploadedById], map: "TicketAttachment_uploadedById_fkey")
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  actorId   Int
+  action    String
+  entity    String
+  entityId  Int
+  dataJson  String?
+  createdAt DateTime @default(now())
+  actor     User     @relation(fields: [actorId], references: [id])
+
+  @@index([actorId], map: "AuditLog_actorId_fkey")
+}
+
+model Insumo {
+  id               Int               @id @default(autoincrement())
+  nome             String
+  tipo             InsumoTipo
+  quantidadeAtual  Int
+  quantidadeMinima Int
+  historico        InsumoHistorico[]
+}
+
+model InsumoHistorico {
+  id         Int      @id @default(autoincrement())
+  ticketId   Int
+  insumoId   Int
+  quantidade Int
+  dataUso    DateTime @default(now())
+  insumo     Insumo   @relation(fields: [insumoId], references: [id])
+  ticket     Ticket   @relation(fields: [ticketId], references: [id])
+
+  @@index([insumoId], map: "InsumoHistorico_insumoId_fkey")
+  @@index([ticketId], map: "InsumoHistorico_ticketId_fkey")
 }
 
 enum Role {
@@ -56,174 +208,8 @@ enum TicketResolution {
   REDE_CONFIGURADA_LOCAL
 }
 
-model Usf {
-  id    Int    @id @default(autoincrement())
-  nome  String @unique
-
-  // Documentação de rede
-  ipOnt            String?
-  modeloSwitch     String?
-  provedorInternet String?
-
-  users   User[]
-  tickets Ticket[]
-
-  @@map("USF")
-}
-
-model User {
-  id           Int      @id @default(autoincrement())
-  nome         String
-  login        String   @unique
-  telefone     String?
-  cargo        String
-  ativo        Boolean  @default(true)
-  role         Role     @default(REQUESTER)
-
-  usfId        Int
-  usf          Usf      @relation(fields: [usfId], references: [id])
-
-  passwordHash String
-  createdAt    DateTime @default(now())
-
-  openedTickets   Ticket[] @relation("TicketRequester")
-  assignedTickets Ticket[] @relation("TicketAssignee")
-
-  messages TicketMessage[]
-  uploads  TicketAttachment[]
-  audits   AuditLog[]
-}
-
-model Category {
-  id     Int     @id @default(autoincrement())
-  nome   String  @unique
-  ativo  Boolean @default(true)
-  system Boolean @default(false)
-  defaultPriority Priority @default(MEDIUM)
-  slaHours        Int?     // SLA em horas (opcional, override da prioridade)
-
-  tickets Ticket[]
-}
-
-model Ticket {
-  id          Int          @id @default(autoincrement())
-  usfId       Int
-  usf         Usf          @relation(fields: [usfId], references: [id])
-
-  requesterId Int
-  requester   User         @relation("TicketRequester", fields: [requesterId], references: [id])
-
-  assigneeId  Int?
-  assignee    User?        @relation("TicketAssignee", fields: [assigneeId], references: [id])
-
-  room        RoomName
-  categoryId  Int
-  category    Category     @relation(fields: [categoryId], references: [id])
-
-  title       String
-  description String
-
-  status      TicketStatus @default(OPEN)
-  priority    Priority     @default(MEDIUM)
-
-  // SLA
-  firstResponseAt    DateTime?
-  responseDueAt      DateTime
-  responseBreachedAt DateTime?
-
-  resolvedAt           DateTime?
-  resolutionDueAt      DateTime
-  resolutionBreachedAt DateTime?
-  slaPausedAt          DateTime?
-  slaPausedTotalMin    Int       @default(0)
-
-  // Resolução padronizada
-  resolution                 TicketResolution?
-  resolutionJustificativa    String?
-  resolutionAcaoRecomendada  String?
-  trocaPecas                 String?
-  trocaData                  DateTime?
-  equipamentoPatrimonio      String?
-
-  // Campos PEC/CADSUS
-  cnsUsuario String?
-  cpfUsuario String?
-
-  // Controle de Insumos
-  insumosUtilizados InsumoHistorico[]
-
-  messages     TicketMessage[]
-  attachments  TicketAttachment[]
-
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-}
-
-model TicketMessage {
-  id          Int      @id @default(autoincrement())
-  ticketId    Int
-  authorId    Int
-  body        String
-  visibility  MessageVisibility @default(PUBLIC)
-  createdAt   DateTime @default(now())
-
-  ticket      Ticket   @relation(fields: [ticketId], references: [id])
-  author      User     @relation(fields: [authorId], references: [id])
-}
-
-model TicketAttachment {
-  id           Int      @id @default(autoincrement())
-  ticketId     Int
-  uploadedById Int
-
-  originalName String
-  storedName   String
-  mimeType     String
-  sizeBytes    Int
-  storagePath  String
-  createdAt    DateTime @default(now())
-
-  ticket       Ticket   @relation(fields: [ticketId], references: [id])
-  uploadedBy   User     @relation(fields: [uploadedById], references: [id])
-}
-
-model AuditLog {
-  id        Int      @id @default(autoincrement())
-  actorId   Int
-  action    String
-  entity    String
-  entityId  Int
-  dataJson  String?
-  createdAt DateTime @default(now())
-
-  actor     User     @relation(fields: [actorId], references: [id])
-}
-
 enum InsumoTipo {
   TONER
   CABO
   PECAS
-}
-
-model Insumo {
-  id               Int      @id @default(autoincrement())
-  nome             String
-  tipo             InsumoTipo
-  quantidadeAtual  Int
-  quantidadeMinima Int
-
-  historico        InsumoHistorico[]
-}
-
-model InsumoHistorico {
-  id         Int      @id @default(autoincrement())
-  
-  ticketId   Int
-  ticket     Ticket   @relation(fields: [ticketId], references: [id])
-  
-  insumoId   Int
-  insumo     Insumo   @relation(fields: [insumoId], references: [id])
-  
-  quantidade Int
-  dataUso    DateTime @default(now())
 }
