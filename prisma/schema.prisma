@@ -3,18 +3,19 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
 model Usf {
-  id               Int      @id @default(autoincrement())
-  nome             String   @unique
+  id               Int        @id @default(autoincrement())
+  nome             String     @unique
   ipOnt            String?
   modeloSwitch     String?
   provedorInternet String?
   tickets          Ticket[]
   users            User[]
+  hardwares        Hardware[]
 
   @@map("USF")
 }
@@ -159,6 +160,23 @@ model InsumoHistorico {
   @@index([ticketId], map: "InsumoHistorico_ticketId_fkey")
 }
 
+model Hardware {
+  id          Int             @id @default(autoincrement())
+  patrimonio  String          @unique
+  usfId       Int
+  sala        RoomName
+  anydesk     String?
+  status      HardwareStatus  @default(ATIVO)
+  tipo        String
+  modelo      String?
+  observacoes String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  usf         Usf             @relation(fields: [usfId], references: [id])
+
+  @@index([usfId], map: "Hardware_usfId_fkey")
+}
+
 enum Role {
   REQUESTER
   COORDINATOR
@@ -212,4 +230,10 @@ enum InsumoTipo {
   TONER
   CABO
   PECAS
+}
+
+enum HardwareStatus {
+  ATIVO
+  MANUTENCAO
+  PERCA_TOTAL
 }

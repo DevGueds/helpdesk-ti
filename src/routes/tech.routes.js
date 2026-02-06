@@ -38,7 +38,7 @@ router.get('/tickets', requireRole('TECH', 'ADMIN'), async (req, res) => {
       include: { usf: true, category: true, requester: true, assignee: true },
       orderBy: { updatedAt: 'desc' }
     }),
-    prisma.usf.findMany({ orderBy: { nome: 'asc' } }),
+    prisma.usf.findMany({ orderBy: { id: 'asc' } }),
     prisma.category.findMany({ where: { ativo: true }, orderBy: [{ system: 'desc' }, { nome: 'asc' }] }),
     prisma.user.findMany({ where: { role: 'TECH', ativo: true }, orderBy: { nome: 'asc' } })
   ]);

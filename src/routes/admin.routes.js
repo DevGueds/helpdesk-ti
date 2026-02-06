@@ -75,7 +75,7 @@ router.get('/sla-breached', requireRole('ADMIN'), async (req, res) => {
 // USFs
 router.get('/usfs', requireRole('ADMIN'), async (req, res) => {
   const prisma = getPrisma();
-  const usfs = await prisma.usf.findMany({ orderBy: { nome: 'asc' } });
+  const usfs = await prisma.usf.findMany({ orderBy: { id: 'asc' } });
   res.render('admin/usfs', { title: 'USFs', usfs });
 });
 
@@ -146,7 +146,7 @@ router.get('/users', requireRole('ADMIN'), async (req, res) => {
   const prisma = getPrisma();
   const [users, usfs] = await Promise.all([
     prisma.user.findMany({ include: { usf: true }, orderBy: { nome: 'asc' } }),
-    prisma.usf.findMany({ orderBy: { nome: 'asc' } })
+    prisma.usf.findMany({ orderBy: { id: 'asc' } })
   ]);
 
   res.render('admin/users', { title: 'Usuários', users, usfs });

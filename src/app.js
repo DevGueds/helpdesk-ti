@@ -14,6 +14,7 @@ const techRoutes = require('./routes/tech.routes');
 const adminRoutes = require('./routes/admin.routes');
 const reportsRoutes = require('./routes/reports.routes');
 const exportRoutes = require('./routes/export.routes');
+const hardwareRoutes = require('./routes/hardware.routes');
 
 const viewHelpers = require('./utils/views');
 const { attachMonitoringStats } = require('./middleware/monitoring');
@@ -97,6 +98,11 @@ function createApp() {
     res.locals.priorityBadgeClass = viewHelpers.priorityBadgeClass;
     res.locals.translateStatus = viewHelpers.translateStatus;
     res.locals.translatePriority = viewHelpers.translatePriority;
+    // Hardware helpers
+    res.locals.getRoomIcon = viewHelpers.getRoomIcon;
+    res.locals.translateRoom = viewHelpers.translateRoom;
+    res.locals.getStatusBadgeClass = viewHelpers.getHardwareStatusBadgeClass;
+    res.locals.translateHardwareStatus = viewHelpers.translateHardwareStatus;
     next();
   });
 
@@ -138,6 +144,7 @@ function createApp() {
   app.use('/admin', adminRoutes);
   app.use('/reports', reportsRoutes);
   app.use('/export', exportRoutes);
+  app.use('/hardware', hardwareRoutes);
 
   app.use((req, res) => res.status(404).send('404 - Página não encontrada'));
   return app;

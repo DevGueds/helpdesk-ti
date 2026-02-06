@@ -44,14 +44,13 @@
           <tr>
             <th class="ps-4" width="80">ID</th>
             <th>Nome da Unidade</th>
-            <th width="150">Rede</th>
-            <th class="text-end pe-4" width="100">Usuários</th>
+            <th width="200">Rede</th>
           </tr>
         </thead>
         <tbody>
           <% if (usfs.length === 0) { %>
             <tr>
-              <td colspan="4" class="text-center py-5 text-muted">
+              <td colspan="3" class="text-center py-5 text-muted">
                 <i class="bi bi-building fs-1 d-block mb-2"></i>
                 Nenhuma unidade cadastrada ainda.
               </td>
@@ -91,11 +90,7 @@
                     <span class="text-muted small">-</span>
                   <% } %>
                 </td>
-                <td class="text-end pe-4">
-                  <span class="badge bg-info">
-                    <i class="bi bi-people"></i> <%= u._count?.users || 0 %>
-                  </span>
-                </td>
+
               </tr>
             <% }) %>
           <% } %>

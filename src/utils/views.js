@@ -46,10 +46,57 @@ function translatePriority(priority) {
   return m[priority] || priority;
 }
 
+// Hardware helpers
+function getRoomIcon(room) {
+  const icons = {
+    'RECEPCAO': 'bi-door-open',
+    'ENFERMAGEM': 'bi-heart-pulse',
+    'MEDICO': 'bi-hospital',
+    'REUNIAO': 'bi-people',
+    'VACINA': 'bi-shield-plus',
+    'TRIAGEM': 'bi-clipboard2-pulse'
+  };
+  return icons[room] || 'bi-geo-alt';
+}
+
+function translateRoom(room) {
+  const translations = {
+    'RECEPCAO': 'Recepção',
+    'ENFERMAGEM': 'Enfermagem',
+    'MEDICO': 'Médico',
+    'REUNIAO': 'Reunião',
+    'VACINA': 'Vacina',
+    'TRIAGEM': 'Triagem'
+  };
+  return translations[room] || room;
+}
+
+function getHardwareStatusBadgeClass(status) {
+  const classes = {
+    'ATIVO': 'bg-success',
+    'MANUTENCAO': 'bg-warning text-dark',
+    'PERCA_TOTAL': 'bg-danger'
+  };
+  return classes[status] || 'bg-secondary';
+}
+
+function translateHardwareStatus(status) {
+  const translations = {
+    'ATIVO': 'Ativo',
+    'MANUTENCAO': 'Manutenção',
+    'PERCA_TOTAL': 'Perca Total'
+  };
+  return translations[status] || status;
+}
+
 module.exports = {
   fmtDateBR,
   statusBadgeClass,
   priorityBadgeClass,
   translateStatus,
-  translatePriority
+  translatePriority,
+  getRoomIcon,
+  translateRoom,
+  getHardwareStatusBadgeClass,
+  translateHardwareStatus
 };
