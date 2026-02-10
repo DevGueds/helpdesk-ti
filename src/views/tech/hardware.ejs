@@ -90,11 +90,17 @@
                   </td>
                   <td class="text-end">
                     <div class="btn-group btn-group-sm" role="group">
-                      <button class="btn btn-info btn-xs" onclick="openEditModal(<%= JSON.stringify(hw) %>)" title="Editar">
-                        <i class="bi bi-pencil" style="font-size: 0.8rem;"></i>
+                      <button class="btn btn-info btn-xs btn-edit-hw" 
+                              data-hw="<%- JSON.stringify(hw).replace(/"/g, '&quot;') %>" 
+                              title="Editar">
+                        <i class="bi bi-pencil text-white" style="font-size: 0.8rem;"></i>
                       </button>
-                      <button class="btn btn-warning btn-xs" onclick="openMoveModal(<%= hw.id %>, '<%= hw.patrimonio %>', <%= JSON.stringify(usfs) %>)" title="Mover">
-                        <i class="bi bi-arrow-left-right" style="font-size: 0.8rem;"></i>
+                      <button class="btn btn-warning btn-xs btn-move-hw" 
+                              data-id="<%= hw.id %>" 
+                              data-patrimonio="<%= hw.patrimonio %>" 
+                              data-usfs="<%- JSON.stringify(usfs).replace(/"/g, '&quot;') %>" 
+                              title="Mover">
+                        <i class="bi bi-arrow-left-right text-white" style="font-size: 0.8rem;"></i>
                       </button>
                     </div>
                   </td>
@@ -143,9 +149,21 @@
         <div class="modal-body">
           <p>Mover equipamento <strong id="movePatrimonio"></strong> para:</p>
           <div class="mb-3">
-            <label class="form-label">Nova USF</label>
+            <label class="form-label">Nova USF *</label>
             <select name="usfId" class="form-select" id="moveUsfSelect" required>
               <option value="">Selecione...</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Nova Sala *</label>
+            <select name="sala" class="form-select" required>
+              <option value="">Selecione...</option>
+              <option value="RECEPCAO">Recepção</option>
+              <option value="ENFERMAGEM">Enfermagem</option>
+              <option value="MEDICO">Médico</option>
+              <option value="REUNIAO">Reunião</option>
+              <option value="VACINA">Vacina</option>
+              <option value="TRIAGEM">Triagem</option>
             </select>
           </div>
         </div>
@@ -218,6 +236,78 @@ function openMoveModal(id, patrimonio, usfs) {
   
   new bootstrap.Modal(document.getElementById('modalMove')).show();
 }
+
+// Event listeners para os botões
+(function() {
+  console.log('[TECH] Inicializando event listeners do hardware...');
+  
+  // Função para decodificar HTML entities
+  function decodeHTMLEntities(text) {
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = text;
+    return textarea.value;
+  }
+  
+  // Aguardar o DOM estar pronto
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initListeners);
+  } else {
+    initListeners();
+  }
+  
+  function initListeners() {
+    console.log('[TECH] DOM pronto, configurando listeners...');
+    
+    // Botões de editar
+    const editButtons = document.querySelectorAll('.btn-edit-hw');
+    console.log(`[TECH] Encontrados ${editButtons.length} botões de editar`);
+    
+    editButtons.forEach(function(btn, index) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        console.log(`[TECH] Botão editar ${index} clicado`);
+        try {
+          const hwData = decodeHTMLEntities(this.getAttribute('data-hw'));
+          console.log('[TECH] Dados hw decodificados:', hwData ? 'OK' : 'VAZIO');
+          
+          const hw = JSON.parse(hwData);
+          console.log('[TECH] Parse bem-sucedido! Abrindo modal...');
+          openEditModal(hw);
+        } catch (error) {
+          console.error('[TECH] Erro ao abrir modal de edição:', error);
+          alert('Erro ao abrir modal de edição. Verifique o console.');
+        }
+      });
+    });
+    
+    // Botões de mover
+    const moveButtons = document.querySelectorAll('.btn-move-hw');
+    console.log(`[TECH] Encontrados ${moveButtons.length} botões de mover`);
+    
+    moveButtons.forEach(function(btn, index) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        console.log(`[TECH] Botão mover ${index} clicado`);
+        try {
+          const id = parseInt(this.getAttribute('data-id'));
+          const patrimonio = this.getAttribute('data-patrimonio');
+          const usfsData = decodeHTMLEntities(this.getAttribute('data-usfs'));
+          console.log('[TECH] ID:', id, 'Patrimônio:', patrimonio);
+          console.log('[TECH] Dados usfs decodificados:', usfsData ? 'OK' : 'VAZIO');
+          
+          const usfs = JSON.parse(usfsData);
+          console.log('[TECH] Parse bem-sucedido! Abrindo modal...');
+          openMoveModal(id, patrimonio, usfs);
+        } catch (error) {
+          console.error('[TECH] Erro ao abrir modal de mover:', error);
+          alert('Erro ao abrir modal de mover. Verifique o console.');
+        }
+      });
+    });
+    
+    console.log('[TECH] Todos os listeners configurados!');
+  }
+})();
 
 function getRoomIcon(room) {
   const icons = {

@@ -93,18 +93,25 @@
                   </td>
                   <td class="text-end">
                     <div class="btn-group btn-group-sm" role="group">
-                      <button class="btn btn-info btn-xs" onclick="openEditModal(<%= JSON.stringify(hw) %>, <%= JSON.stringify(usfs) %>)" title="Editar">
-                        <i class="bi bi-pencil" style="font-size: 0.8rem;"></i>
+                      <button class="btn btn-info btn-xs btn-edit-hw" 
+                              data-hw="<%- JSON.stringify(hw).replace(/"/g, '&quot;') %>" 
+                              data-usfs="<%- JSON.stringify(usfs).replace(/"/g, '&quot;') %>" 
+                              title="Editar">
+                        <i class="bi bi-pencil text-white" style="font-size: 0.8rem;"></i>
                       </button>
-                      <button class="btn btn-warning btn-xs" onclick="openMoveModal(<%= hw.id %>, '<%= hw.patrimonio %>', <%= JSON.stringify(usfs) %>)" title="Mover">
-                        <i class="bi bi-arrow-left-right" style="font-size: 0.8rem;"></i>
+                      <button class="btn btn-warning btn-xs btn-move-hw" 
+                              data-id="<%= hw.id %>" 
+                              data-patrimonio="<%= hw.patrimonio %>" 
+                              data-usfs="<%- JSON.stringify(usfs).replace(/"/g, '&quot;') %>" 
+                              title="Mover">
+                        <i class="bi bi-arrow-left-right text-white" style="font-size: 0.8rem;"></i>
                       </button>
-                      <form method="POST" action="/hardware/<%= hw.id %>/delete" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja excluir este hardware?');">
-                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                        <button type="submit" class="btn btn-danger btn-xs" title="Excluir">
-                          <i class="bi bi-trash" style="font-size: 0.8rem;"></i>
-                        </button>
-                      </form>
+                      <button class="btn btn-danger btn-xs btn-delete-hw" 
+                              data-id="<%= hw.id %>" 
+                              data-patrimonio="<%= hw.patrimonio %>" 
+                              title="Excluir">
+                        <i class="bi bi-trash text-white" style="font-size: 0.8rem;"></i>
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -222,15 +229,52 @@
         <div class="modal-body">
           <p>Mover equipamento <strong id="movePatrimonio"></strong> para:</p>
           <div class="mb-3">
-            <label class="form-label">Nova USF</label>
+            <label class="form-label">Nova USF *</label>
             <select name="usfId" class="form-select" id="moveUsfSelect" required>
               <option value="">Selecione...</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Nova Sala *</label>
+            <select name="sala" class="form-select" required>
+              <option value="">Selecione...</option>
+              <option value="RECEPCAO">Recepção</option>
+              <option value="ENFERMAGEM">Enfermagem</option>
+              <option value="MEDICO">Médico</option>
+              <option value="REUNIAO">Reunião</option>
+              <option value="VACINA">Vacina</option>
+              <option value="TRIAGEM">Triagem</option>
             </select>
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
           <button type="submit" class="btn btn-warning">Mover</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Confirmar Exclusão -->
+<div class="modal fade" id="modalDelete" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST" id="formDelete">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Confirmar Exclusão</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p>Tem certeza que deseja excluir o equipamento <strong id="deletePatrimonio"></strong>?</p>
+          <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle"></i> Esta ação não pode ser desfeita!
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-danger">Excluir</button>
         </div>
       </form>
     </div>
@@ -349,6 +393,111 @@ function openMoveModal(id, patrimonio, usfs) {
   
   new bootstrap.Modal(document.getElementById('modalMove')).show();
 }
+
+function openDeleteModal(id, patrimonio) {
+  const form = document.getElementById('formDelete');
+  form.action = `/hardware/${id}/delete`;
+  
+  document.getElementById('deletePatrimonio').textContent = patrimonio;
+  
+  new bootstrap.Modal(document.getElementById('modalDelete')).show();
+}
+
+// Event listeners para os botões
+(function() {
+  console.log('Inicializando event listeners do hardware...');
+  
+  // Função para decodificar HTML entities
+  function decodeHTMLEntities(text) {
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = text;
+    return textarea.value;
+  }
+  
+  // Aguardar o DOM estar pronto
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initListeners);
+  } else {
+    initListeners();
+  }
+  
+  function initListeners() {
+    console.log('DOM pronto, configurando listeners...');
+    
+    // Botões de editar
+    const editButtons = document.querySelectorAll('.btn-edit-hw');
+    console.log(`Encontrados ${editButtons.length} botões de editar`);
+    
+    editButtons.forEach(function(btn, index) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        console.log(`Botão editar ${index} clicado`);
+        try {
+          const hwData = decodeHTMLEntities(this.getAttribute('data-hw'));
+          const usfsData = decodeHTMLEntities(this.getAttribute('data-usfs'));
+          console.log('Dados hw decodificados:', hwData ? 'OK' : 'VAZIO');
+          console.log('Dados usfs decodificados:', usfsData ? 'OK' : 'VAZIO');
+          
+          const hw = JSON.parse(hwData);
+          const usfs = JSON.parse(usfsData);
+          console.log('Parse bem-sucedido! Abrindo modal...');
+          openEditModal(hw, usfs);
+        } catch (error) {
+          console.error('Erro ao abrir modal de edição:', error);
+          alert('Erro ao abrir modal de edição. Verifique o console.');
+        }
+      });
+    });
+    
+    // Botões de mover
+    const moveButtons = document.querySelectorAll('.btn-move-hw');
+    console.log(`Encontrados ${moveButtons.length} botões de mover`);
+    
+    moveButtons.forEach(function(btn, index) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        console.log(`Botão mover ${index} clicado`);
+        try {
+          const id = parseInt(this.getAttribute('data-id'));
+          const patrimonio = this.getAttribute('data-patrimonio');
+          const usfsData = decodeHTMLEntities(this.getAttribute('data-usfs'));
+          console.log('ID:', id, 'Patrimônio:', patrimonio);
+          console.log('Dados usfs decodificados:', usfsData ? 'OK' : 'VAZIO');
+          
+          const usfs = JSON.parse(usfsData);
+          console.log('Parse bem-sucedido! Abrindo modal...');
+          openMoveModal(id, patrimonio, usfs);
+        } catch (error) {
+          console.error('Erro ao abrir modal de mover:', error);
+          alert('Erro ao abrir modal de mover. Verifique o console.');
+        }
+      });
+    });
+    
+    // Botões de excluir
+    const deleteButtons = document.querySelectorAll('.btn-delete-hw');
+    console.log(`Encontrados ${deleteButtons.length} botões de excluir`);
+    
+    deleteButtons.forEach(function(btn, index) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        console.log(`Botão excluir ${index} clicado`);
+        try {
+          const id = parseInt(this.getAttribute('data-id'));
+          const patrimonio = this.getAttribute('data-patrimonio');
+          console.log('ID:', id, 'Patrimônio:', patrimonio);
+          
+          openDeleteModal(id, patrimonio);
+        } catch (error) {
+          console.error('Erro ao abrir modal de exclusão:', error);
+          alert('Erro ao abrir modal de exclusão. Verifique o console.');
+        }
+      });
+    });
+    
+    console.log('Todos os listeners configurados!');
+  }
+})();
 </script>
 
 <style>

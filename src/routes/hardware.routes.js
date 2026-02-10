@@ -147,11 +147,12 @@ router.post('/:id/update', requireAuth, async (req, res) => {
   res.redirect('/hardware');
 });
 
-// Mover hardware para outra USF (ADMIN e TECH)
+// Mover hardware para outra USF e/ou sala (ADMIN e TECH)
 router.post('/:id/move', requireAuth, async (req, res) => {
   const prisma = getPrisma();
   const id = Number(req.params.id);
   const newUsfId = Number(req.body.usfId);
+  const newSala = String(req.body.sala || '');
 
   // Verificar permissão
   if (!['ADMIN', 'TECH'].includes(req.user.role)) {
@@ -159,8 +160,8 @@ router.post('/:id/move', requireAuth, async (req, res) => {
     return res.redirect('/');
   }
 
-  if (!newUsfId) {
-    req.flash('error', 'Selecione uma USF de destino.');
+  if (!newUsfId || !newSala) {
+    req.flash('error', 'Selecione uma USF e uma sala de destino.');
     return res.redirect('/hardware');
   }
 
@@ -178,13 +179,18 @@ router.post('/:id/move', requireAuth, async (req, res) => {
 
   await prisma.hardware.update({
     where: { id },
-    data: { usfId: newUsfId }
+    data: { 
+      usfId: newUsfId,
+      sala: newSala
+    }
   });
 
   await logAudit(req.user.id, 'HARDWARE_MOVE', 'Hardware', id, {
     patrimonio: hardware.patrimonio,
     fromUsf: hardware.usf.nome,
-    toUsf: newUsf.nome
+    toUsf: newUsf.nome,
+    fromSala: hardware.sala,
+    toSala: newSala
   });
 
   req.flash('success', `Hardware ${hardware.patrimonio} movido para ${newUsf.nome}.`);

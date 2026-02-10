@@ -30,6 +30,7 @@ function createApp() {
         defaultSrc: ["'self'"],
         scriptSrc: [
           "'self'",
+          "'unsafe-inline'", // Required for inline scripts in EJS templates
           "https://cdn.jsdelivr.net" // Chart.js and Bootstrap
         ],
         styleSrc: [
