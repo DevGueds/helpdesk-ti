@@ -61,7 +61,6 @@ async function main() {
 
   const cost = Number(process.env.BCRYPT_COST || 10);
   const passAdmin = await bcrypt.hash('sms.capanema2026', cost);
-  const passOthers = await bcrypt.hash('Admin@123', cost);
 
   const primeiraUsf = usfs['Maria Rosa Batista'];
 
@@ -78,54 +77,6 @@ async function main() {
       role: 'ADMIN',
       usfId: primeiraUsf.id,
       passwordHash: passAdmin
-    }
-  });
-
-  // Técnico TI
-  await prisma.user.upsert({
-    where: { login: 'ti' },
-    update: {},
-    create: {
-      nome: 'Técnico TI',
-      login: 'ti',
-      telefone: '000000000',
-      cargo: 'Técnico de TI',
-      ativo: true,
-      role: 'TECH',
-      usfId: primeiraUsf.id,
-      passwordHash: passOthers
-    }
-  });
-
-  // Enfermeiro / Coordenador
-  await prisma.user.upsert({
-    where: { login: 'enfermeiro' },
-    update: {},
-    create: {
-      nome: 'Enfermeiro USF',
-      login: 'enfermeiro',
-      telefone: '000000000',
-      cargo: 'Enfermeiro',
-      ativo: true,
-      role: 'COORDINATOR',
-      usfId: usfs['Vila Sorriso'].id,
-      passwordHash: passOthers
-    }
-  });
-
-  // Solicitante
-  await prisma.user.upsert({
-    where: { login: 'solicitante' },
-    update: {},
-    create: {
-      nome: 'Solicitante USF',
-      login: 'solicitante',
-      telefone: '000000000',
-      cargo: 'Recepção',
-      ativo: true,
-      role: 'REQUESTER',
-      usfId: usfs['Vila Sorriso'].id,
-      passwordHash: passOthers
     }
   });
 }
