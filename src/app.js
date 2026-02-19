@@ -49,6 +49,7 @@ function createApp() {
           ],
           imgSrc: ["'self'", "data:", "https:"],
           connectSrc: ["'self'"],
+          upgradeInsecureRequests: null, // Desabilitado: app roda em HTTP puro
         },
       },
     }),
