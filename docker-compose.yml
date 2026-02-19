@@ -22,9 +22,7 @@ services:
 
   # ── Aplicação Node.js ───────────────────────────────────────────────────────
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/devgueds/helpdesk-ti:latest
     container_name: helpdesk-app
     restart: unless-stopped
     ports:
