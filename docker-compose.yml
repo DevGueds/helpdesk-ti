@@ -13,12 +13,6 @@ services:
       - helpdesk_db_data:/var/lib/mysql
     networks:
       - helpdesk-net
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "--silent"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 60s
 
   # ── Aplicação Node.js ───────────────────────────────────────────────────────
   app:
@@ -28,8 +22,7 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      db:
-        condition: service_healthy
+      - db
     networks:
       - helpdesk-net
     volumes:
