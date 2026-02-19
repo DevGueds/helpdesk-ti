@@ -13,23 +13,37 @@ async function upsertCategory(nome, system = false, ativo = true) {
 }
 
 async function main() {
-  // USFs (note: com o model renomeado para Usf, o delegate é prisma.usf)
-  const usfA = await prisma.usf.upsert({
-    where: { nome: 'SMS' },
-    update: {},
-    create: {
-      nome: 'SMS',
-      ipOnt: '192.168.1.1',
-      modeloSwitch: 'TP-Link 24p',
-      provedorInternet: 'Vivo Fibra'
-    }
-  });
+  // USFs
+  const usfNomes = [
+    'Maria Rosa Batista',
+    'Inussum',
+    'Waldemar Queiroz',
+    'Reginaldo Romariz',
+    'Walter P. Lobato',
+    'Perote',
+    'Cesp(Raimundo Ambé)',
+    'Cesp(Neomar Varela)',
+    'Raimunda Reis',
+    'Fernando Mendes',
+    '7 Travessa',
+    'Mata Sede',
+    'Vila Sorriso',
+    'Nova Assis',
+    'Arnoldo Tavares',
+    'Manoel Valente',
+    'Francisco Carneiro',
+    'Josepha Murrieta',
+    'Jorge Netto da Costa',
+  ];
 
-  const usfB = await prisma.usf.upsert({
-    where: { nome: 'USF Vila Sorriso' },
-    update: {},
-    create: { nome: 'USF Vila Sorriso' }
-  });
+  const usfs = {};
+  for (const nome of usfNomes) {
+    usfs[nome] = await prisma.usf.upsert({
+      where: { nome },
+      update: {},
+      create: { nome }
+    });
+  }
 
   // Categorias fixas (admin pode criar outras depois)
   const fixed = [
@@ -45,44 +59,25 @@ async function main() {
     await upsertCategory(nome, true, true);
   }
 
-  // Insumos
-  const insumos = [
-    { nome: 'Toner 285A', tipo: 'TONER', quantidadeAtual: 5, quantidadeMinima: 2 },
-    { nome: 'Cabo de Rede (Metro)', tipo: 'CABO', quantidadeAtual: 300, quantidadeMinima: 50 },
-    { nome: 'Conector RJ45', tipo: 'PECAS', quantidadeAtual: 100, quantidadeMinima: 20 },
-    { nome: 'Mouse USB', tipo: 'PECAS', quantidadeAtual: 10, quantidadeMinima: 5 },
-  ];
-
-  for (const item of insumos) {
-    await prisma.insumo.create({
-      data: item
-    }).catch(() => {
-      // Ignorar se já existir (hack simples, ideal seria upsert pelo nome se fosse unico)
-      // Como não definimos @unique no nome do Insumo, vamos checar antes ou usar createMany
-    });
-    // Melhor abordagem para seed seguro:
-    const exists = await prisma.insumo.findFirst({ where: { nome: item.nome } });
-    if (!exists) {
-      await prisma.insumo.create({ data: item });
-    }
-  }
-
   const cost = Number(process.env.BCRYPT_COST || 10);
-  const passHash = await bcrypt.hash('Admin@123', cost);
+  const passAdmin = await bcrypt.hash('sms.capanema2026', cost);
+  const passOthers = await bcrypt.hash('Admin@123', cost);
+
+  const primeiraUsf = usfs['Maria Rosa Batista'];
 
   // Admin
   await prisma.user.upsert({
-    where: { login: 'admin' },
-    update: {},
+    where: { login: 'Admin' },
+    update: { passwordHash: passAdmin },
     create: {
       nome: 'Administrador',
-      login: 'admin',
+      login: 'Admin',
       telefone: '000000000',
       cargo: 'Administrador',
       ativo: true,
       role: 'ADMIN',
-      usfId: usfA.id,
-      passwordHash: passHash
+      usfId: primeiraUsf.id,
+      passwordHash: passAdmin
     }
   });
 
@@ -97,8 +92,8 @@ async function main() {
       cargo: 'Técnico de TI',
       ativo: true,
       role: 'TECH',
-      usfId: usfA.id,
-      passwordHash: passHash
+      usfId: primeiraUsf.id,
+      passwordHash: passOthers
     }
   });
 
@@ -113,8 +108,8 @@ async function main() {
       cargo: 'Enfermeiro',
       ativo: true,
       role: 'COORDINATOR',
-      usfId: usfB.id,
-      passwordHash: passHash
+      usfId: usfs['Vila Sorriso'].id,
+      passwordHash: passOthers
     }
   });
 
@@ -129,8 +124,8 @@ async function main() {
       cargo: 'Recepção',
       ativo: true,
       role: 'REQUESTER',
-      usfId: usfB.id,
-      passwordHash: passHash
+      usfId: usfs['Vila Sorriso'].id,
+      passwordHash: passOthers
     }
   });
 }
