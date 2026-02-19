@@ -1,0 +1,9 @@
+node_modules
+.env
+.git
+.gitignore
+prisma/dev.db
+*.log
+*.md
+.temp-*
+start.bat
